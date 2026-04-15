@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EarnHive – Complete Tasks. Earn Real Money.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #F5A623;
+    --gold-light: #FFD080;
+    --green: #00C48C;
+    --dark: #0A0E1A;
+    --dark2: #111827;
+    --card: #161D2F;
+    --border: rgba(255,255,255,0.07);
+    --text: #E8EAF0;
+    --muted: #7B8399;
+    --red: #FF4D6D;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; }
+
+  /* NAV */
+  nav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; background:var(--dark2);
+    border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100;
+  }
+  .logo { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; color:var(--gold); }
+  .logo span { color:#fff; }
+  .nav-links { display:flex; gap:10px; }
+  .nav-btn {
+    padding:7px 14px; border-radius:8px; font-size:0.8rem; font-weight:600;
+    cursor:pointer; border:none; font-family:'DM Sans',sans-serif;
+    transition:all .2s;
+  }
+  .nav-btn.outline { background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .nav-btn.primary { background:var(--gold); color:#000; }
+  .nav-btn.danger { background:var(--red); color:#fff; }
+  .nav-btn:hover { transform:translateY(-1px); opacity:.9; }
+  .avatar {
+    width:32px; height:32px; border-radius:50%; background:var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:.85rem; color:#000; cursor:pointer;
+  }
+
+  /* PAGES */
+  .page { display:none; padding:20px; max-width:480px; margin:0 auto; }
+  .page.active { display:block; }
+
+  /* HERO BANNER */
+  .hero-banner {
+    background:linear-gradient(135deg, #1A2744 0%, #0F1D3D 100%);
+    border:1px solid rgba(245,166,35,0.3);
+    border-radius:16px; padding:24px; text-align:center; margin-bottom:20px;
+    position:relative; overflow:hidden;
+  }
+  .hero-banner::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:130px; height:130px; border-radius:50%;
+    background:radial-gradient(circle, rgba(245,166,35,.2), transparent);
+  }
+  .hero-banner h2 { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; margin-bottom:6px; }
+  .hero-banner p { color:var(--muted); font-size:.85rem; margin-bottom:16px; line-height:1.5; }
+  .activate-btn {
+    display:inline-block; background:var(--gold); color:#000;
+    padding:11px 28px; border-radius:10px; font-weight:700;
+    font-size:.9rem; text-decoration:none; cursor:pointer; border:none;
+    font-family:'DM Sans',sans-serif; transition:all .2s;
+  }
+  .activate-btn:hover { transform:scale(1.03); box-shadow:0 4px 20px rgba(245,166,35,.4); }
+  .activated-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(0,196,140,.15); border:1px solid var(--green);
+    color:var(--green); padding:8px 18px; border-radius:10px; font-size:.85rem; font-weight:600;
+  }
+
+  /* STATS */
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:16px; text-align:center;
+  }
+  .stat-label { font-size:.75rem; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+  .stat-value { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; color:var(--gold); }
+  .stat-value.green { color:var(--green); }
+
+  /* SECTION */
+  .section { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:16px; }
+  .section-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:14px; }
+
+  /* TASK CARDS */
+  .task-card {
+    background:var(--dark2); border:1px solid var(--border); border-radius:12px;
+    padding:14px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
+  }
+  .task-icon {
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem; flex-shrink:0;
+  }
+  .task-info { flex:1; }
+  .task-name { font-weight:600; font-size:.9rem; margin-bottom:2px; }
+  .task-desc { font-size:.78rem; color:var(--muted); }
+  .task-reward { font-weight:700; color:var(--green); font-size:.9rem; white-space:nowrap; }
+  .task-btn {
+    padding:7px 14px; border-radius:8px; border:none; cursor:pointer;
+    font-size:.78rem; font-weight:600; font-family:'DM Sans',sans-serif;
+    background:var(--gold); color:#000; transition:all .2s; white-space:nowrap;
+  }
+  .task-btn:hover { transform:scale(1.03); }
+  .task-btn.done { background:rgba(0,196,140,.15); color:var(--green); border:1px solid var(--green); cursor:default; }
+
+  /* REFERRAL */
+  .ref-box {
+    background:var(--dark); border:1px solid var(--border); border-radius:10px;
+    padding:12px; margin-bottom:12px;
+  }
+  .ref-label { font-size:.75rem; color:var(--muted); margin-bottom:6px; }
+  .ref-link-row { display:flex; gap:8px; align-items:center; }
+  .ref-link {
+    flex:1; background:var(--dark2); border:1px solid var(--border); border-radius:8px;
+    padding:9px 12px; font-size:.78rem; color:var(--text); word-break:break-all;
+  }
+  .copy-btn {
+    padding:9px 14px; border:none; border-radius:8px; background:var(--gold);
+    color:#000; font-weight:700; font-size:.78rem; cursor:pointer; white-space:nowrap;
+    font-family:'DM Sans',sans-serif;
+  }
+  .ref-stat { display:flex; justify-content:space-between; margin-top:10px; }
+  .ref-item { text-align:center; }
+  .ref-num { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; color:var(--gold); }
+  .ref-sub { font-size:.72rem; color:var(--muted); }
+
+  .ref-list-item {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border); font-size:.85rem;
+  }
+  .ref-list-item:last-child { border-bottom:none; }
+  .ref-joined { color:var(--muted); font-size:.75rem; }
+  .ref-earned { color:var(--green); font-weight:600; }
+
+  /* HOW IT WORKS */
+  .step { display:flex; gap:14px; align-items:flex-start; margin-bottom:14px; }
+  .step-num {
+    width:30px; height:30px; border-radius:50%; background:var(--gold);
+    color:#000; font-weight:800; font-size:.85rem; display:flex; align-items:center;
+    justify-content:center; flex-shrink:0;
+  }
+  .step-text { font-size:.85rem; color:var(--text); line-height:1.5; }
+  .step-title { font-weight:600; margin-bottom:2px; }
+
+  /* PROGRESS */
+  .progress-bar {
+    background:var(--dark); border-radius:99px; height:8px; margin-top:8px; overflow:hidden;
+  }
+  .progress-fill {
+    height:100%; background:linear-gradient(90deg, var(--gold), var(--green));
+    border-radius:99px; transition:width .5s;
+  }
+  .progress-label { display:flex; justify-content:space-between; font-size:.75rem; color:var(--muted); margin-top:4px; }
+
+  /* ACTIVITY */
+  .activity-item {
+    display:flex; gap:10px; align-items:flex-start; padding:10px 0;
+    border-bottom:1px solid var(--border); font-size:.83rem;
+  }
+  .activity-item:last-child { border-bottom:none; }
+  .activity-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); margin-top:5px; flex-shrink:0; }
+  .activity-dot.green { background:var(--green); }
+  .activity-time { color:var(--muted); font-size:.72rem; margin-top:2px; }
+
+  /* WITHDRAW */
+  .withdraw-form { }
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:.8rem; color:var(--muted); margin-bottom:6px; display:block; }
+  .form-input {
+    width:100%; background:var(--dark); border:1px solid var(--border); border-radius:10px;
+    padding:11px 14px; color:var(--text); font-size:.9rem; font-family:'DM Sans',sans-serif;
+    outline:none; transition:border .2s;
+  }
+  .form-input:focus { border-color:var(--gold); }
+  .form-select {
+    width:100%; background:var(--dark); border:1px solid var(--border); border-radius:10px;
+    padding:11px 14px; color:var(--text); font-size:.9rem; font-family:'DM Sans',sans-serif;
+    outline:none; appearance:none;
+  }
+  .submit-btn {
+    width:100%; padding:13px; background:var(--gold); color:#000; border:none;
+    border-radius:10px; font-weight:700; font-size:1rem; cursor:pointer;
+    font-family:'Syne',sans-serif; transition:all .2s;
+  }
+  .submit-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(245,166,35,.35); }
+  .submit-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  /* TOAST */
+  #toast {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px);
+    background:var(--green); color:#000; padding:11px 22px; border-radius:10px;
+    font-weight:600; font-size:.85rem; z-index:9999; transition:transform .3s; pointer-events:none;
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+  #toast.error { background:var(--red); color:#fff; }
+
+  /* AUTH */
+  .auth-wrap { max-width:380px; margin:40px auto; padding:20px; }
+  .auth-logo { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--gold); text-align:center; margin-bottom:4px; }
+  .auth-logo span { color:#fff; }
+  .auth-sub { text-align:center; color:var(--muted); font-size:.85rem; margin-bottom:28px; }
+  .auth-box { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+  .auth-title { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:18px; }
+  .auth-switch { text-align:center; margin-top:16px; font-size:.83rem; color:var(--muted); }
+  .auth-switch a { color:var(--gold); cursor:pointer; text-decoration:none; font-weight:600; }
+  .auth-box .form-group { margin-bottom:12px; }
+
+  /* EARNINGS PAGE */
+  .earnings-summary {
+    background:linear-gradient(135deg, #1C2E1C, #0E1E0E);
+    border:1px solid rgba(0,196,140,.3); border-radius:14px; padding:20px;
+    text-align:center; margin-bottom:20px;
+  }
+  .earnings-total { font-family:'Syne',sans-serif; font-size:2.2rem; font-weight:800; color:var(--green); }
+  .earnings-label { color:var(--muted); font-size:.8rem; margin-top:4px; }
+
+  /* empty state */
+  .empty { text-align:center; padding:30px 0; color:var(--muted); font-size:.85rem; }
+  .empty-icon { font-size:2.5rem; margin-bottom:8px; }
+
+  /* LOCKED overlay */
+  .locked-overlay {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:30px; text-align:center; gap:10px;
+  }
+  .lock-icon { font-size:2.5rem; }
+  .lock-msg { color:var(--muted); font-size:.85rem; }
+
+  /* MODAL */
+  .modal-bg {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+    z-index:200; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-bg.open { display:flex; }
+  .modal {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:24px; max-width:360px; width:100%;
+  }
+  .modal h3 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; }
+  .modal p { color:var(--muted); font-size:.85rem; line-height:1.6; margin-bottom:16px; }
+  .modal-btns { display:flex; gap:10px; }
+  .modal-btns button { flex:1; padding:11px; border-radius:10px; border:none; cursor:pointer; font-weight:600; font-family:'DM Sans',sans-serif; font-size:.85rem; }
+  .modal-btns .cancel { background:var(--dark); color:var(--muted); }
+  .modal-btns .confirm { background:var(--gold); color:#000; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+  .page.active > * { animation:fadeIn .3s ease both; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- AUTH PAGES -->
+<div id="authWrap">
+  <!-- LOGIN -->
+  <div class="auth-wrap" id="loginPage">
+    <div class="auth-logo">Earn<span>Hive</span></div>
+    <div class="auth-sub">Complete tasks. Earn real KSH.</div>
+    <div class="auth-box">
+      <div class="auth-title">Sign In</div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="loginUser" type="text" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPass" type="password" placeholder="Enter password">
+      </div>
+      <button class="submit-btn" onclick="doLogin()">Sign In</button>
+      <div class="auth-switch">New here? <a onclick="showRegister()">Create account</a></div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="auth-wrap" id="registerPage" style="display:none">
+    <div class="auth-logo">Earn<span>Hive</span></div>
+    <div class="auth-sub">Start earning in minutes.</div>
+    <div class="auth-box">
+      <div class="auth-title">Create Account</div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="regUser" type="text" placeholder="Choose a username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="regPass" type="password" placeholder="Create password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Referral Code (optional)</label>
+        <input class="form-input" id="regRef" type="text" placeholder="Enter referral code">
+      </div>
+      <button class="submit-btn" onclick="doRegister()">Create Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP (hidden until login) -->
+<div id="app" style="display:none">
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Earn<span>Hive</span></div>
+    <div class="nav-links">
+      <button class="nav-btn outline" onclick="showPage('dashboard')">Home</button>
+      <button class="nav-btn outline" onclick="showPage('tasks')">Tasks</button>
+      <button class="nav-btn outline" onclick="showPage('earnings')">Earn</button>
+      <div class="avatar" id="avatarBtn" onclick="showPage('dashboard')">?</div>
+      <button class="nav-btn danger" onclick="doLogout()">Out</button>
+    </div>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <!-- Hero Banner -->
+    <div class="hero-banner" id="heroBanner">
+      <h2 id="welcomeText">Welcome!</h2>
+      <p id="heroMsg">Earn rewards by completing tasks on our platform.<br>Activate your account to start earning now.</p>
+      <div id="heroAction">
+        <button class="activate-btn" onclick="openActivateModal()">💳 PAY &amp; ACTIVATE</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value" id="balanceDisplay">KSH 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tasks Done</div>
+        <div class="stat-value green" id="tasksDoneDisplay">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Referrals</div>
+        <div class="stat-value" id="refCountDisplay">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Level</div>
+        <div class="stat-value" id="levelDisplay">1</div>
+      </div>
+    </div>
+
+    <!-- Tasks Preview -->
+    <div class="section">
+      <div class="section-title">📋 Tasks Preview</div>
+      <div class="task-card">
+        <div class="task-icon" style="background:rgba(245,166,35,.1)">📅</div>
+        <div class="task-info">
+          <div class="task-name">Daily Check-in</div>
+          <div class="task-desc">Check in every day</div>
+        </div>
+        <button class="task-btn" onclick="showPage('tasks')">Go</button>
+      </div>
+      <div class="task-card">
+        <div class="task-icon" style="background:rgba(0,196,140,.1)">🧠</div>
+        <div class="task-info">
+          <div class="task-name">Trivia Quiz</div>
+          <div class="task-desc">Answer 5 questions</div>
+        </div>
+        <button class="task-btn" onclick="showPage('tasks')">Go</button>
+      </div>
+      <div class="task-card">
+        <div class="task-icon" style="background:rgba(100,130,255,.1)">💬</div>
+        <div class="task-info">
+          <div class="task-name">Chat to Earn</div>
+          <div class="task-desc">Engage in conversations</div>
+        </div>
+        <button class="task-btn" onclick="showPage('tasks')">Go</button>
+      </div>
+    </div>
+
+    <!-- Referral Box -->
+    <div class="section">
+      <div class="section-title">🔗 Your Referral Link</div>
+      <div class="ref-box">
+        <div class="ref-label">Share this link — earn KSH 20 per signup!</div>
+        <div class="ref-link-row">
+          <div class="ref-link" id="refLinkBox">loading...</div>
+          <button class="copy-btn" onclick="copyRef()">Copy</button>
+        </div>
+      </div>
+      <div class="ref-stat">
+        <div class="ref-item">
+          <div class="ref-num" id="refTotal">0</div>
+          <div class="ref-sub">Total Refs</div>
+        </div>
+        <div class="ref-item">
+          <div class="ref-num" id="refEarned">KSH 0</div>
+          <div class="ref-sub">Ref Earnings</div>
+        </div>
+        <div class="ref-item">
+          <div class="ref-num">KSH 20</div>
+          <div class="ref-sub">Per Referral</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="section">
+      <div class="section-title">⚡ How It Works</div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><div class="step-title">Activate your account</div>Pay once to unlock all tasks & earnings.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><div class="step-title">Complete tasks</div>Earn KSH for every task you complete daily.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><div class="step-title">Refer friends</div>Earn KSH 20 instantly for every friend who joins.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><div class="step-title">Withdraw anytime</div>M-Pesa withdrawals once you hit the minimum.</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="section">
+      <div class="section-title">🏆 Progress</div>
+      <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:6px;">
+        <span id="levelLabel">Level 1</span>
+        <span id="pointsLabel" style="color:var(--muted)">0 / 100 pts</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="section">
+      <div class="section-title">🕐 Recent Activity</div>
+      <div id="activityList">
+        <div class="empty"><div class="empty-icon">🌱</div>No activity yet. Complete your first task!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASKS PAGE -->
+  <div class="page" id="page-tasks">
+    <div class="section-title" style="margin-bottom:14px">🎯 Available Tasks</div>
+
+    <div id="tasksLockedMsg" style="display:none">
+      <div class="section">
+        <div class="locked-overlay">
+          <div class="lock-icon">🔒</div>
+          <div style="font-weight:700">Account Not Activated</div>
+          <div class="lock-msg">Activate your account to unlock all tasks and start earning real money.</div>
+          <button class="activate-btn" onclick="openActivateModal()">💳 PAY &amp; ACTIVATE</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tasksList"></div>
+  </div>
+
+  <!-- EARNINGS PAGE -->
+  <div class="page" id="page-earnings">
+    <div class="earnings-summary">
+      <div class="earnings-total" id="earningsTotalDisplay">KSH 0.00</div>
+      <div class="earnings-label">Total Earnings</div>
+    </div>
+
+    <!-- Referral Details -->
+    <div class="section">
+      <div class="section-title">👥 My Referrals</div>
+      <div class="ref-box">
+        <div class="ref-label">Your referral link</div>
+        <div class="ref-link-row">
+          <div class="ref-link" id="refLinkBox2">loading...</div>
+          <button class="copy-btn" onclick="copyRef()">Copy</button>
+        </div>
+      </div>
+      <div id="refListContainer">
+        <div class="empty"><div class="empty-icon">👥</div>No referrals yet. Share your link!</div>
+      </div>
+    </div>
+
+    <!-- Withdraw -->
+    <div class="section" id="withdrawSection">
+      <div class="section-title">💸 Withdraw Earnings</div>
+      <div id="withdrawContent">
+        <div class="form-group">
+          <label class="form-label">M-Pesa Number</label>
+          <input class="form-input" id="mpesaNum" type="tel" placeholder="07XXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (KSH)</label>
+          <input class="form-input" id="withdrawAmt" type="number" placeholder="Min. KSH 200">
+        </div>
+        <button class="submit-btn" onclick="doWithdraw()">Request Withdrawal</button>
+        <div style="text-align:center;margin-top:10px;font-size:.75rem;color:var(--muted)">Minimum withdrawal: KSH 200</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVATE MODAL -->
+<div class="modal-bg" id="activateModal">
+  <div class="modal">
+    <h3>💳 Activate Account</h3>
+    <p>To start earning, pay the one-time activation fee via M-Pesa. You'll be redirected to complete payment securely.</p>
+    <div style="background:var(--dark);border-radius:10px;padding:12px;margin-bottom:16px;font-size:.85rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--muted)">Activation Fee</span><span style="font-weight:700">KSH 150</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted)">You unlock</span><span style="color:var(--green);font-weight:700">All tasks + KSH 20/referral</span></div>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeActivateModal()">Cancel</button>
+      <button class="confirm" onclick="goActivate()">Pay Now →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA STORE (localStorage)
+// ============================================================
+const STORE_KEY = 'earnhive_data';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveData(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
+
+// All users stored as: data.users = { username: { pass, activated, balance, tasks, referrals, referredBy, activity, points } }
+function getUsers() { return loadData().users || {}; }
+function saveUsers(u) { const d = loadData(); d.users = u; saveData(d); }
+
+function currentUser() { return loadData().session || null; }
+function setSession(u) { const d = loadData(); d.session = u; saveData(d); }
+function clearSession() { const d = loadData(); delete d.session; saveData(d); }
+
+function getUserData(username) {
+  const users = getUsers();
+  return users[username] || null;
+}
+function updateUserData(username, updates) {
+  const users = getUsers();
+  users[username] = { ...users[username], ...updates };
+  saveUsers(users);
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function showLogin() {
+  document.getElementById('loginPage').style.display = '';
+  document.getElementById('registerPage').style.display = 'none';
+}
+function showRegister() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('registerPage').style.display = '';
+  // prefill ref from URL
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  if (urlRef) document.getElementById('regRef').value = urlRef;
+}
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!user || !pass) return toast('Fill all fields', true);
+  const users = getUsers();
+  if (!users[user]) return toast('User not found', true);
+  if (users[user].pass !== btoa(pass)) return toast('Wrong password', true);
+  setSession(user);
+  showApp();
+}
+
+function doRegister() {
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const ref = document.getElementById('regRef').value.trim().toUpperCase();
+  if (!user || !pass) return toast('Fill all fields', true);
+  if (user.length < 3) return toast('Username too short', true);
+  if (pass.length < 4) return toast('Password too short (min 4)', true);
+  const users = getUsers();
+  if (users[user]) return toast('Username taken', true);
+
+  // Find referrer
+  let referredBy = null;
+  if (ref) {
+    const refUser = Object.keys(users).find(u => genRefCode(u) === ref);
+    if (refUser) {
+      referredBy = refUser;
+    } else {
+      return toast('Invalid referral code', true);
+    }
+  }
+
+  users[user] = {
+    pass: btoa(pass),
+    activated: false,
+    balance: 0,
+    tasks: {},
+    referrals: [],
+    referredBy,
+    activity: [],
+    points: 0,
+    joinedAt: new Date().toISOString()
+  };
+
+  // Credit referrer KSH 20 if they exist and are activated
+  if (referredBy && users[referredBy] && users[referredBy].activated) {
+    users[referredBy].balance = (users[referredBy].balance || 0) + 20;
+    users[referredBy].referrals = [...(users[referredBy].referrals || []), { username: user, at: new Date().toISOString(), earned: 20 }];
+    users[referredBy].points = (users[referredBy].points || 0) + 20;
+    addActivityTo(users[referredBy], '💰 Referral bonus', `${user} joined using your link`, 'gold');
+  } else if (referredBy && users[referredBy] && !users[referredBy].activated) {
+    // Queue the referral — will be credited when referrer activates? No — credit only if referrer is active.
+    // Store pending referral
+    users[referredBy].referrals = [...(users[referredBy].referrals || []), { username: user, at: new Date().toISOString(), earned: 0, pending: true }];
+  }
+
+  saveUsers(users);
+  setSession(user);
+  toast('Account created! Welcome 🎉');
+  showApp();
+}
+
+function doLogout() {
+  clearSession();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authWrap').style.display = '';
+  showLogin();
+}
+
+function genRefCode(username) {
+  // simple deterministic code
+  let code = username.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (code.length < 3) code = code + 'HVE';
+  return (code.substring(0,4) + hashStr(username)).toUpperCase().substring(0,8);
+}
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36).toUpperCase().substring(0,4);
+}
+
+function addActivityTo(userData, title, desc, type='gold') {
+  userData.activity = userData.activity || [];
+  userData.activity.unshift({ title, desc, type, at: new Date().toISOString() });
+  if (userData.activity.length > 20) userData.activity = userData.activity.slice(0,20);
+}
+
+// ============================================================
+// APP RENDER
+// ============================================================
+function showApp() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  renderAll();
+  showPage('dashboard');
+}
+
+function renderAll() {
+  const username = currentUser();
+  if (!username) return;
+  const u = getUserData(username);
+  if (!u) return;
+
+  // Avatar
+  document.getElementById('avatarBtn').textContent = username[0].toUpperCase();
+
+  // Welcome banner
+  document.getElementById('welcomeText').textContent = `Welcome, ${username}! 👋`;
+  if (u.activated) {
+    document.getElementById('heroMsg').textContent = 'Your account is active. Complete tasks and earn daily!';
+    document.getElementById('heroAction').innerHTML = '<div class="activated-badge">✅ Account Active</div>';
+  } else {
+    document.getElementById('heroMsg').innerHTML = 'Earn rewards by completing tasks.<br>Activate your account to start earning now.';
+    document.getElementById('heroAction').innerHTML = '<button class="activate-btn" onclick="openActivateModal()">💳 PAY & ACTIVATE</button>';
+  }
+
+  // Stats
+  document.getElementById('balanceDisplay').textContent = `KSH ${(u.balance||0).toFixed(0)}`;
+  document.getElementById('tasksDoneDisplay').textContent = Object.keys(u.tasks||{}).filter(k=>u.tasks[k]).length;
+  document.getElementById('refCountDisplay').textContent = (u.referrals||[]).length;
+
+  // Level
+  const pts = u.points || 0;
+  const level = Math.floor(pts / 100) + 1;
+  const levelPts = pts % 100;
+  document.getElementById('levelDisplay').textContent = level;
+  document.getElementById('levelLabel').textContent = `Level ${level}`;
+  document.getElementById('pointsLabel').textContent = `${levelPts} / 100 pts`;
+  document.getElementById('progressFill').style.width = `${levelPts}%`;
+
+  // Ref link
+  const refCode = genRefCode(username);
+  const refUrl = `${window.location.origin}${window.location.pathname}?ref=${refCode}`;
+  document.getElementById('refLinkBox').textContent = refUrl;
+  document.getElementById('refLinkBox2').textContent = refUrl;
+
+  // Referral stats
+  const refs = u.referrals || [];
+  document.getElementById('refTotal').textContent = refs.length;
+  const refEarnings = refs.reduce((s,r)=>s+(r.earned||0),0);
+  document.getElementById('refEarned').textContent = `KSH ${refEarnings}`;
+
+  // Earnings
+  document.getElementById('earningsTotalDisplay').textContent = `KSH ${(u.balance||0).toFixed(2)}`;
+
+  // Referral list
+  const container = document.getElementById('refListContainer');
+  if (refs.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>No referrals yet. Share your link!</div>';
+  } else {
+    container.innerHTML = refs.map(r=>`
+      <div class="ref-list-item">
+        <div>
+          <div style="font-weight:600">${r.username}</div>
+          <div class="ref-joined">${timeAgo(r.at)}</div>
+        </div>
+        <div class="ref-earned">${r.pending ? '<span style="color:var(--muted)">Pending</span>' : 'KSH '+r.earned}</div>
+      </div>
+    `).join('');
+  }
+
+  // Activity
+  const acts = u.activity || [];
+  const actEl = document.getElementById('activityList');
+  if (acts.length === 0) {
+    actEl.innerHTML = '<div class="empty"><div class="empty-icon">🌱</div>No activity yet. Complete your first task!</div>';
+  } else {
+    actEl.innerHTML = acts.slice(0,10).map(a=>`
+      <div class="activity-item">
+        <div class="activity-dot ${a.type==='green'?'green':''}"></div>
+        <div>
+          <div style="font-weight:600">${a.title}</div>
+          <div style="color:var(--muted);font-size:.78rem">${a.desc}</div>
+          <div class="activity-time">${timeAgo(a.at)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Tasks
+  renderTasks(u);
+}
+
+// ============================================================
+// TASKS
+// ============================================================
+const TASKS = [
+  { id:'checkin', name:'Daily Check-in', desc:'Check in to earn daily reward', icon:'📅', reward:5, bg:'rgba(245,166,35,.1)', daily:true },
+  { id:'trivia', name:'Trivia Quiz', desc:'Answer 5 trivia questions correctly', icon:'🧠', reward:15, bg:'rgba(0,196,140,.1)', action:'trivia' },
+  { id:'chat', name:'Chat to Earn', desc:'Send 10 messages in community', icon:'💬', reward:10, bg:'rgba(100,130,255,.1)' },
+  { id:'share', name:'Share on Social', desc:'Share EarnHive on WhatsApp/Twitter', icon:'📢', reward:8, bg:'rgba(255,80,100,.1)' },
+  { id:'profile', name:'Complete Profile', desc:'Fill in all your profile details', icon:'👤', reward:12, bg:'rgba(200,100,255,.1)' },
+  { id:'survey', name:'Daily Survey', desc:'Complete today\'s quick survey', icon:'📊', reward:20, bg:'rgba(255,160,50,.1)', daily:true },
+];
+
+function renderTasks(u) {
+  const locked = !u.activated;
+  document.getElementById('tasksLockedMsg').style.display = locked ? '' : 'none';
+
+  const list = document.getElementById('tasksList');
+  if (locked) { list.innerHTML = ''; return; }
+
+  const today = new Date().toDateString();
+  list.innerHTML = TASKS.map(t => {
+    const doneKey = t.daily ? `${t.id}_${today}` : t.id;
+    const done = u.tasks && u.tasks[doneKey];
+    return `
+      <div class="task-card">
+        <div class="task-icon" style="background:${t.bg}">${t.icon}</div>
+        <div class="task-info">
+          <div class="task-name">${t.name}</div>
+          <div class="task-desc">${t.desc}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div class="task-reward">+KSH ${t.reward}</div>
+          ${done
+            ? '<button class="task-btn done">✓ Done</button>'
+            : `<button class="task-btn" onclick="doTask('${t.id}','${doneKey}',${t.reward})">Start</button>`}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function doTask(taskId, doneKey, reward) {
+  const username = currentUser();
+  const u = getUserData(username);
+  if (!u.activated) return toast('Activate account first!', true);
+  if (u.tasks && u.tasks[doneKey]) return toast('Already completed!', true);
+
+  // Simulate task completion
+  if (taskId === 'trivia') {
+    runTrivia(doneKey, reward);
+    return;
+  }
+
+  completeTask(username, doneKey, reward, TASKS.find(t=>t.id===taskId));
+}
+
+function completeTask(username, doneKey, reward, task) {
+  const users = getUsers();
+  const u = users[username];
+  u.tasks = u.tasks || {};
+  u.tasks[doneKey] = true;
+  u.balance = (u.balance || 0) + reward;
+  u.points = (u.points || 0) + reward;
+  addActivityTo(u, `${task.icon} ${task.name}`, `Earned KSH ${reward}`, 'green');
+  users[username] = u;
+  saveUsers(users);
+  toast(`🎉 Earned KSH ${reward}!`);
+  renderAll();
+}
+
+// Simple trivia
+const TRIVIA_Q = [
+  { q:'What is the capital of Kenya?', a:['Nairobi','Mombasa','Kisumu','Nakuru'], correct:0 },
+  { q:'How many days in a week?', a:['5','6','7','8'], correct:2 },
+  { q:'What is 15 + 27?', a:['40','42','43','45'], correct:1 },
+  { q:'Which planet is closest to the sun?', a:['Venus','Earth','Mars','Mercury'], correct:3 },
+  { q:'What color is the sky on a clear day?', a:['Green','Blue','Red','Yellow'], correct:1 },
+];
+let triviaScore = 0, triviaIdx = 0, triviaDoneKey = '', triviaReward = 0;
+
+function runTrivia(doneKey, reward) {
+  triviaDoneKey = doneKey; triviaReward = reward;
+  triviaScore = 0; triviaIdx = 0;
+  showTriviaQ();
+}
+function showTriviaQ() {
+  if (triviaIdx >= TRIVIA_Q.length) {
+    const earned = triviaScore * 3;
+    const username = currentUser();
+    completeTask(username, triviaDoneKey, earned, { icon:'🧠', name:'Trivia Quiz' });
+    toast(`Quiz done! ${triviaScore}/5 correct. Earned KSH ${earned}`);
+    return;
+  }
+  const q = TRIVIA_Q[triviaIdx];
+  const btns = q.a.map((a,i)=>`<button onclick="answerTrivia(${i})" style="width:100%;margin:5px 0;padding:10px;background:var(--dark2);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:.85rem;text-align:left">${a}</button>`).join('');
+  showModal(`Question ${triviaIdx+1}/5`, `<b>${q.q}</b>${btns}`, false);
+}
+function answerTrivia(idx) {
+  if (idx === TRIVIA_Q[triviaIdx].correct) { triviaScore++; toast('✅ Correct!'); }
+  else toast('❌ Wrong!', true);
+  triviaIdx++;
+  closeActivateModal();
+  setTimeout(showTriviaQ, 600);
+}
+
+// ============================================================
+// MODAL / ACTIVATE
+// ============================================================
+function openActivateModal() {
+  document.getElementById('activateModal').classList.add('open');
+}
+function closeActivateModal() {
+  document.getElementById('activateModal').classList.remove('open');
+}
+function goActivate() {
+  closeActivateModal();
+  // Open payment link
+  window.open('https://lipwa.link/7762', '_blank');
+  // After returning, simulate activation confirmation
+  setTimeout(()=>{
+    const confirmed = confirm('Did you complete the payment? Click OK to activate your account.');
+    if (confirmed) {
+      const username = currentUser();
+      const users = getUsers();
+      users[username].activated = true;
+      // Credit pending referral earnings
+      const referredBy = users[username].referredBy;
+      if (referredBy && users[referredBy]) {
+        const pendingIdx = (users[referredBy].referrals||[]).findIndex(r=>r.username===username && r.pending);
+        if (pendingIdx > -1) {
+          users[referredBy].referrals[pendingIdx].earned = 20;
+          users[referredBy].referrals[pendingIdx].pending = false;
+          users[referredBy].balance = (users[referredBy].balance||0) + 20;
+          users[referredBy].points = (users[referredBy].points||0) + 20;
+          addActivityTo(users[referredBy], '💰 Referral bonus', `${username} activated — KSH 20 credited`, 'gold');
+        }
+      }
+      addActivityTo(users[username], '✅ Account Activated', 'Welcome to EarnHive! Start earning.', 'green');
+      saveUsers(users);
+      toast('🎉 Account Activated! Start earning now!');
+      renderAll();
+    }
+  }, 1500);
+}
+
+function showModal(title, body, showBtns=true) {
+  document.getElementById('activateModal').innerHTML = `
+    <div class="modal">
+      <h3>${title}</h3>
+      <div style="color:var(--text);font-size:.85rem;line-height:1.6;margin-bottom:16px">${body}</div>
+      ${showBtns ? '<div class="modal-btns"><button class="cancel" onclick="closeActivateModal()">Close</button></div>' : ''}
+    </div>`;
+  document.getElementById('activateModal').classList.add('open');
+}
+
+// ============================================================
+// WITHDRAW
+// ============================================================
+function doWithdraw() {
+  const username = currentUser();
+  const u = getUserData(username);
+  if (!u.activated) return toast('Activate account first!', true);
+  const num = document.getElementById('mpesaNum').value.trim();
+  const amt = parseFloat(document.getElementById('withdrawAmt').value);
+  if (!num || !amt) return toast('Fill all fields', true);
+  if (amt < 200) return toast('Minimum KSH 200', true);
+  if (amt > (u.balance||0)) return toast('Insufficient balance', true);
+  if (!/^07\d{8}$/.test(num)) return toast('Invalid M-Pesa number (07XXXXXXXXX)', true);
+
+  const users = getUsers();
+  users[username].balance = (users[username].balance||0) - amt;
+  addActivityTo(users[username], '💸 Withdrawal', `KSH ${amt} to ${num} — Processing`, 'gold');
+  saveUsers(users);
+  toast(`Withdrawal of KSH ${amt} submitted! Processing within 24hrs.`);
+  document.getElementById('mpesaNum').value = '';
+  document.getElementById('withdrawAmt').value = '';
+  renderAll();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function copyRef() {
+  const username = currentUser();
+  const refCode = genRefCode(username);
+  const refUrl = `${window.location.origin}${window.location.pathname}?ref=${refCode}`;
+  navigator.clipboard.writeText(refUrl).then(()=>toast('Referral link copied! 🔗')).catch(()=>{
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = refUrl; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Referral link copied! 🔗');
+  });
+}
+
+function toast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'error' : '';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff/60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins/60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs/24)}d ago`;
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById('page-'+name);
+  if (el) el.classList.add('active');
+  renderAll();
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+(function init() {
+  const user = currentUser();
+  if (user && getUserData(user)) {
+    showApp();
+  } else {
+    clearSession();
+    // Check for ref in URL
+    const urlRef = new URLSearchParams(window.location.search).get('ref');
+    if (urlRef) showRegister();
+    else showLogin();
+  }
+})();
+</script>
+</body>
+</html>
